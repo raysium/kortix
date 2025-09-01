@@ -4,30 +4,30 @@ load_dotenv()
 from fastapi import FastAPI, Request, HTTPException, Response, Depends, APIRouter
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import JSONResponse, StreamingResponse
-from services import redis
-import sentry
+from src.services import redis
+import src.sentry as sentry
 from contextlib import asynccontextmanager
-from agentpress.thread_manager import ThreadManager
-from services.supabase import DBConnection
+from src.agentpress.thread_manager import ThreadManager
+from src.services.supabase import DBConnection
 from datetime import datetime, timezone
-from utils.config import config, EnvMode
+from src.utils.config import config, EnvMode
 import asyncio
-from utils.logger import logger, structlog
+from src.utils.logger import logger, structlog
 import time
 from collections import OrderedDict
 
 from pydantic import BaseModel
 import uuid
 
-from agent import api as agent_api
+from src.features.agent import api as agent_api
 
-from sandbox import api as sandbox_api
-from services import billing as billing_api
-from services import transcription as transcription_api
+from src.features.sandbox import api as sandbox_api
+from src.services import billing as billing_api
+from src.services import transcription as transcription_api
 import sys
-from services import email_api
-from triggers import api as triggers_api
-from services import api_keys_api
+from src.services import email_api
+from src.features.triggers import api as triggers_api
+from src.services import api_keys_api
 
 
 if sys.platform == "win32":
@@ -56,7 +56,7 @@ async def lifespan(app: FastAPI):
         sandbox_api.initialize(db)
         
         # Initialize Redis connection
-        from services import redis
+        from src.services import redis
         try:
             await redis.initialize_async()
             logger.debug("Redis connection initialized successfully")
@@ -160,9 +160,9 @@ api_router.include_router(sandbox_api.router)
 api_router.include_router(billing_api.router)
 api_router.include_router(api_keys_api.router)
 
-from mcp_module import api as mcp_api
-from credentials import api as credentials_api
-from templates import api as template_api
+from src.features.mcp_module import api as mcp_api
+from src.features.credentials import api as credentials_api
+from src.features.templates import api as template_api
 
 api_router.include_router(mcp_api.router)
 api_router.include_router(credentials_api.router, prefix="/secure-mcp")
@@ -171,21 +171,21 @@ api_router.include_router(template_api.router, prefix="/templates")
 api_router.include_router(transcription_api.router)
 api_router.include_router(email_api.router)
 
-from knowledge_base import api as knowledge_base_api
+from src.features.knowledge_base import api as knowledge_base_api
 api_router.include_router(knowledge_base_api.router)
 
 api_router.include_router(triggers_api.router)
 
-from pipedream import api as pipedream_api
+from src.features.pipedream import api as pipedream_api
 api_router.include_router(pipedream_api.router)
 
-from admin import api as admin_api
+from src.features.admin import api as admin_api
 api_router.include_router(admin_api.router)
 
-from composio_integration import api as composio_api
+from src.features.composio_integration import api as composio_api
 api_router.include_router(composio_api.router)
 
-from google.google_slides_api import router as google_slides_router
+from src.features.google.google_slides_api import router as google_slides_router
 api_router.include_router(google_slides_router)
 
 @api_router.get("/health")
