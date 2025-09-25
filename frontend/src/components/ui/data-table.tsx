@@ -152,7 +152,7 @@ export function DataTable<T>({
                     {column.cell 
                       ? column.cell(item) 
                       : column.accessorKey 
-                        ? String(item[column.accessorKey] || '')
+                        ? String(item?.[column.accessorKey] || '')
                         : ''
                     }
                   </TableCell>

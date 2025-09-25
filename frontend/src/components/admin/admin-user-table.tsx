@@ -58,18 +58,25 @@ export function AdminUserTable({ onUserSelect }: AdminUserTableProps) {
   }, [searchEmail]);
 
   const formatCurrency = (amount: number) => {
+    if (typeof amount !== 'number' || isNaN(amount)) return '$0.00';
     return `$${amount.toFixed(2)}`;
   };
 
   const formatDate = (dateString: string) => {
-    return new Date(dateString).toLocaleDateString('en-US', {
-      month: 'short',
-      day: 'numeric',
-      year: 'numeric',
-    });
+    if (!dateString) return 'N/A';
+    try {
+      return new Date(dateString).toLocaleDateString('en-US', {
+        month: 'short',
+        day: 'numeric',
+        year: 'numeric',
+      });
+    } catch (error) {
+      return 'Invalid Date';
+    }
   };
 
   const tierName = (tier: string) => {
+    if (!tier) return 'Unknown';
     switch (tier) {
       case 'tier_2_20':
         return '20 Dollar';
@@ -88,9 +95,9 @@ export function AdminUserTable({ onUserSelect }: AdminUserTableProps) {
       header: 'User',
       cell: (user) => (
         <div className="flex flex-col gap-1 min-w-[200px]">
-          <div className="font-medium text-foreground">{user.email}</div>
+          <div className="font-medium text-foreground">{user?.email || 'N/A'}</div>
           <div className="text-xs text-muted-foreground">
-            Joined {formatDate(user.created_at)}
+            Joined {formatDate(user?.created_at || '')}
           </div>
         </div>
       ),
@@ -100,7 +107,7 @@ export function AdminUserTable({ onUserSelect }: AdminUserTableProps) {
       header: 'Tier',
       cell: (user) => (
         <Badge variant="outline" className="capitalize">
-          {tierName(user.tier)}
+          {tierName(user?.tier || '')}
         </Badge>
       ),
       width: 'w-42',
@@ -111,7 +118,7 @@ export function AdminUserTable({ onUserSelect }: AdminUserTableProps) {
       cell: (user) => (
         <div className="text-start">
           <div className="font-medium text-green-600">
-            {formatCurrency(user.credit_balance)}
+            {formatCurrency(user?.credit_balance || 0)}
           </div>
         </div>
       ),

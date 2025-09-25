@@ -20,7 +20,7 @@ export default function AdminBillingPage() {
   const [selectedUser, setSelectedUser] = useState<UserSummary | null>(null);
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   
-  const { data: stats } = useAdminUserStats();
+  const { data: stats, isLoading: statsLoading } = useAdminUserStats();
   const { refreshUserList, refreshUserStats } = useRefreshUserData();
 
   const handleUserSelect = (user: UserSummary) => {
@@ -39,11 +39,13 @@ export default function AdminBillingPage() {
   };
 
   const formatCurrency = (amount: number) => {
+    if (typeof amount !== 'number' || isNaN(amount)) return '$0.00';
     return `$${amount.toFixed(2)}`;
   };
 
   const calculateActivityRate = () => {
-    if (!stats || stats.total_users === 0) return 0;
+    if (!stats || !stats.total_users || stats.total_users === 0) return 0;
+    if (!stats.active_users_30d) return 0;
     return Math.round((stats.active_users_30d / stats.total_users) * 100);
   };
 
